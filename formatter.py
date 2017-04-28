@@ -36,25 +36,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.DeckOrder = {"Champion":None,"Troop":[],"Action":[],"Artifact":[],"Constant":[],"Resource":[],"Reserve":[]}
         
         inReserves = False
+        nextLineChamp = False
+        
         for line in self.deckListEntry.toPlainText().split("\n"):
-            if line == "Reserves":
-                inReserves = True
-            
-            try:
-                count, cardname = line.split("x ")
-            except:
-                cardname = None
-            
-            if not inReserves:
-                if cardname in self.CardKey:
-                    cardtype = self.CardKey[cardname]["type"]
-                    self.DeckOrder[cardtype].append(line)
+            if nextLineChamp:
+                self.DeckOrder["Champion"] = line
+                nextLineChamp = False
             else:
-                if cardname in self.CardKey:
-                    self.DeckOrder["Reserve"].append(line)
-            
-            if "Champion:" in line:
-                self.DeckOrder["Champion"] = line.split(": ")[1]
+                if line.lower() == "reserves":
+                    inReserves = True
+                
+                ourSplit = line.split(" ")
+                cardname = ""
+                
+                for i in range(1, len(ourSplit)):
+                    cardname = "%s %s"%(cardname, ourSplit[i])
+                
+                cardname = cardname.strip()
+                
+                if not inReserves:
+                    if cardname in self.CardKey:
+                        cardtype = self.CardKey[cardname]["type"]
+                        self.DeckOrder[cardtype].append(line)
+                else:
+                    if cardname in self.CardKey:
+                        self.DeckOrder["Reserve"].append(line)
+                
+                if "Champion:" in line:
+                    self.DeckOrder["Champion"] = line.split(": ")[1]
+                
+                if line == "CHAMPION":
+                    nextLineChamp = True
                 
         decklist = "[decklist Title=TITLE]\n"
         
