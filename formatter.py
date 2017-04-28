@@ -16,10 +16,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.show()
         
         self.CardKey = {}
-        self.CardTypes = ["Troop","Action","Artifact","Constant","Resource"]
-        
-        self.ReadableDeck = {}
-        self.DeckOrder = {"Troop":[],"Action":[],"Artifact":[],"Constant":[],"Resource":[],"Reserve":[]}
+        self.CardTypes = ["Troop","Action","Artifact","Constant","Resource","Reserve"]
         
         with open(HexCardData) as f:
             for line in f:
@@ -35,6 +32,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.generateImage.clicked.connect(self.goPushed)
    
     def goPushed(self):
+        self.ReadableDeck = {}
+        self.DeckOrder = {"Champion":None,"Troop":[],"Action":[],"Artifact":[],"Constant":[],"Resource":[],"Reserve":[]}
+        
         inReserves = False
         for line in self.deckListEntry.toPlainText().split("\n"):
             if line == "Reserves":
@@ -52,17 +52,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 if cardname in self.CardKey:
                     self.DeckOrder["Reserve"].append(line)
+            
+            if "Champion:" in line:
+                self.DeckOrder["Champion"] = line.split(": ")[1]
                 
         decklist = "[decklist Title=TITLE]\n"
         
-        for t in self.DeckOrder:
-            if len(self.DeckOrder[t]) > 0:
+        for t in self.CardTypes:
+            if len(self.DeckOrder[t]) > 0 and t != "Champion":
                 decklist = "%s[%ss]\n"%(decklist, t)
                 
                 for card in self.DeckOrder[t]:
                     decklist = "%s%s\n"%(decklist, card)
                 
                 decklist = "%s[/%ss]\n"%(decklist, t)
+        
+        decklist = "%s<h4>Champion: [champ]%s[/champ]</h4>\n<hr>\n"%(decklist, self.DeckOrder["Champion"])
         
         self.deckListOutput.setText(decklist)
         
