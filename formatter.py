@@ -50,17 +50,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 cardname = ""
                 
                 for i in range(1, len(ourSplit)):
+                    if "[" in ourSplit[i]:
+                        break
                     cardname = "%s %s"%(cardname, ourSplit[i])
                 
                 cardname = cardname.strip()
                 
+                formattedline = "%s %s"%(ourSplit[0].strip("x"), cardname)
+                
                 if not inReserves:
                     if cardname in self.CardKey:
                         cardtype = self.CardKey[cardname]["type"]
-                        self.DeckOrder[cardtype].append(line)
+                        self.DeckOrder[cardtype].append(formattedline)
                 else:
                     if cardname in self.CardKey:
-                        self.DeckOrder["Reserve"].append(line)
+                        self.DeckOrder["Reserve"].append(formattedline)
                 
                 if "Champion:" in line:
                     self.DeckOrder["Champion"] = line.split(": ")[1]
@@ -79,7 +83,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 
                 decklist = "%s[/%ss]\n"%(decklist, t)
         
-        decklist = "%s<h4>Champion: [champ]%s[/champ]</h4>\n<hr>\n"%(decklist, self.DeckOrder["Champion"])
+        decklist = "%s[/decklist]\n<h4>Champion: [champ]%s[/champ]</h4>\n<hr>\n"%(decklist, self.DeckOrder["Champion"])
         
         self.deckListOutput.setText(decklist)
         
